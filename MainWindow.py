@@ -20,11 +20,39 @@ class MainWindow(QWidget):
         self.layout = QGridLayout()
         self.setLayout(self.layout)
 
+        # experiment info
+        self.descriptionPanel = QGroupBox("Description")
+        self.descriptionPanel.setFixedSize(200,150)
+        self.layout.addWidget(self.descriptionPanel)
+        self.descriptionLayout = QGridLayout()
+        self.descriptionPanel.setLayout(self.descriptionLayout)
+
         # params panel, GB can't add widget
         self.buttonsPanel = QGroupBox("Initial params")
+        self.buttonsPanel.setFixedSize(200,350)
         self.layout.addWidget(self.buttonsPanel)
         self.buttonsLayout = QGridLayout()
         self.buttonsPanel.setLayout(self.buttonsLayout)
+
+        # control panel
+        self.controlPanel = QGroupBox("Control of experiments")
+        self.controlPanel.setFixedSize(200,100)
+        self.layout.addWidget(self.controlPanel)
+        self.controlLayout = QGridLayout()
+        self.controlPanel.setLayout(self.controlLayout)
+
+
+        # origin
+        self.labelOrigin = QLabel("Origen de la muestra", self)
+        self.descriptionLayout.addWidget(self.labelOrigin) 
+        self.inputOrigin = QLineEdit("", self)
+        self.descriptionLayout.addWidget(self.inputOrigin) 
+
+        # tipo de muestra
+        self.labelSampleType = QLabel("Tipo de la muestra", self)
+        self.descriptionLayout.addWidget(self.labelSampleType) 
+        self.inputSampleType = QLineEdit("", self)
+        self.descriptionLayout.addWidget(self.inputSampleType) 
 
         # iterations
         self.labelIterations = QLabel("Número de repeticiones", self)
@@ -61,17 +89,23 @@ class MainWindow(QWidget):
 
         # confirm
         self.buttonConfirm= QPushButton("Confirm", self)
-        self.buttonsLayout.addWidget(self.buttonConfirm)
+        self.controlLayout.addWidget(self.buttonConfirm, 0, 0)
         #self.buttonConfirm.setEnabled(False)
 
+        # launch
         self.buttonLaunch= QPushButton("Launch", self)
-        self.buttonsLayout.addWidget(self.buttonLaunch)
+        self.controlLayout.addWidget(self.buttonLaunch, 0, 1)
         self.buttonLaunch.setEnabled(False)
 
         # save
         self.buttonSave = QPushButton("Save", self)
-        self.buttonsLayout.addWidget(self.buttonSave)
+        self.controlLayout.addWidget(self.buttonSave, 1, 0)
         self.buttonSave.setEnabled(False)
+
+        # Finish
+        self.buttonFinish = QPushButton("Finish", self)
+        self.controlLayout.addWidget(self.buttonFinish, 1, 1)
+        self.buttonFinish.setEnabled(False)
 
         # table
         self.table= QTabWidget()
@@ -98,20 +132,24 @@ class MainWindow(QWidget):
 
         self.table.addTab(tab1, "&Table")
         self.table.addTab(tab2, "&Console")
+        self.table.setFixedSize(415,450)
 
-        self.layout.addWidget(self.table, 0, 1)
+        self.layout.addWidget(self.table, 0, 1, 2, 1)
     
     def loadData(self):
-        rowPosition = self.tableWidget.rowCount()
-        self.tableWidget.insertRow(rowPosition)
+        if self.inputIterations.text() == "":
+            self.inputIterations.setText("1")
 
-        #self.iterations = self.inputIterations.text()
+        if  self.iterations < int(self.inputIterations.text()): 
+            rowPosition = self.tableWidget.rowCount()
+            self.tableWidget.insertRow(rowPosition)
 
-        self.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(self.comboBoxBallSize.currentText()))
-        self.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(self.labelHeightValue.text()))
-        self.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.inputDistance.text()))
-        self.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(str(round(random.random(),5)))) #hash distintivo x exp
-    
+            self.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(self.comboBoxBallSize.currentText()))
+            self.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(self.labelHeightValue.text()))
+            self.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.inputDistance.text()))
+            self.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(str(round(random.random(),5)))) #hash distintivo x exp
+            self.iterations += 1
+        
     def onMedirAltura(self):
         self.labelHeightValue.setText(str(round(random.random(),3)))
 
