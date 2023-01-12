@@ -2,6 +2,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from re import sub
+
 import random
 
 class MainWindow(QWidget):
@@ -49,10 +51,10 @@ class MainWindow(QWidget):
         self.descriptionLayout.addWidget(self.inputOrigin) 
 
         # tipo de muestra
-        self.labelSampleType = QLabel("Tipo de la muestra", self)
-        self.descriptionLayout.addWidget(self.labelSampleType) 
-        self.inputSampleType = QLineEdit("", self)
-        self.descriptionLayout.addWidget(self.inputSampleType) 
+        self.labelType = QLabel("Tipo de la muestra", self)
+        self.descriptionLayout.addWidget(self.labelType) 
+        self.inputType = QLineEdit("", self)
+        self.descriptionLayout.addWidget(self.inputType) 
 
         # iterations
         self.labelIterations = QLabel("Número de repeticiones", self)
@@ -112,8 +114,12 @@ class MainWindow(QWidget):
 
         tab1 = QWidget()
         self.tableWidget = QTableWidget(0, 4)
-        columns = ["Ball size", "Rock size", "Distance", "Data"]
+        columns = ["Ball size", "Rock size", "Distance", "Register"]
         self.tableWidget.setHorizontalHeaderLabels(columns)
+
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Stretch)       
+        #header.setSectionResizeMode(3, QHeaderView.Stretch)
 
         tab1hbox = QHBoxLayout()
         tab1hbox.setContentsMargins(5, 5, 5, 5)
@@ -132,9 +138,21 @@ class MainWindow(QWidget):
 
         self.table.addTab(tab1, "&Table")
         self.table.addTab(tab2, "&Console")
-        self.table.setFixedSize(415,450)
+        self.table.setFixedSize(415,600)
 
-        self.layout.addWidget(self.table, 0, 1, 2, 1)
+        self.layout.addWidget(self.table, 0, 1, 3, 1)
+
+    def transformText(self, text):
+        text = sub(r"(_|-)+.", " ", text).title().replace(" ", "")
+        return "".join([text[0].lower(), text[1:]])
+
+    def experimentNaming(self):
+        sampleOrigin = self.transformText(self.inputOrigin.text())
+        sampleType = self.transformText(self.inputType.text())
+
+        return sampleOrigin + "_" + sampleType
+
+        
     
     def loadData(self):
         if self.inputIterations.text() == "":
@@ -147,7 +165,7 @@ class MainWindow(QWidget):
             self.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(self.comboBoxBallSize.currentText()))
             self.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(self.labelHeightValue.text()))
             self.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.inputDistance.text()))
-            self.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(str(round(random.random(),5)))) #hash distintivo x exp
+            self.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(self.experimentNaming())) #hash distintivo x exp
             self.iterations += 1
         
     def onMedirAltura(self):
