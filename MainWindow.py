@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from re import sub
 
 import random
+import datetime
 
 class MainWindow(QWidget):
 
@@ -13,6 +14,7 @@ class MainWindow(QWidget):
         self.iterations = 0
         self.validationDetails = ""
         self.validation = False
+ 
         self.setupUI()
         self.clicks()
     
@@ -42,7 +44,6 @@ class MainWindow(QWidget):
         self.layout.addWidget(self.controlPanel)
         self.controlLayout = QGridLayout()
         self.controlPanel.setLayout(self.controlLayout)
-
 
         # origin
         self.labelOrigin = QLabel("Origen de la muestra", self)
@@ -119,7 +120,7 @@ class MainWindow(QWidget):
 
         header = self.tableWidget.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Stretch)       
-        #header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
 
         tab1hbox = QHBoxLayout()
         tab1hbox.setContentsMargins(5, 5, 5, 5)
@@ -138,22 +139,24 @@ class MainWindow(QWidget):
 
         self.table.addTab(tab1, "&Table")
         self.table.addTab(tab2, "&Console")
-        self.table.setFixedSize(415,600)
+        self.table.setFixedSize(500,600)
 
         self.layout.addWidget(self.table, 0, 1, 3, 1)
 
     def transformText(self, text):
         text = sub(r"(_|-)+.", " ", text).title().replace(" ", "")
         return "".join([text[0].lower(), text[1:]])
+    
+    def transformDate(self):
+        now = datetime.datetime.now()
+        return now.strftime("%Y%m%d%H%M%S")
 
     def experimentNaming(self):
         sampleOrigin = self.transformText(self.inputOrigin.text())
         sampleType = self.transformText(self.inputType.text())
+        sampleDate = self.transformDate()
+        return sampleDate + "_" + sampleOrigin + "_" + sampleType
 
-        return sampleOrigin + "_" + sampleType
-
-        
-    
     def loadData(self):
         if self.inputIterations.text() == "":
             self.inputIterations.setText("1")
@@ -197,10 +200,6 @@ class MainWindow(QWidget):
     def checkInputDistance(self):
         pass # revisar que los caracteres sean soolo numeros y no otras cosas
 
-    def checkHeightValue(self):
-        return self.labelHeightValue != ""
-             
-
     def disablePanel(self):
         self.inputIterations.setEnabled(False)
         self.buttonHome.setEnabled(False)
@@ -224,8 +223,10 @@ class MainWindow(QWidget):
             msg.setInformativeText("This is additional information")
             msg.setWindowTitle("MessageBox demo")
             msg.setDetailedText(self.validationDetails)
-            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
+
+        self.validationDetails = ""
 
 
 
