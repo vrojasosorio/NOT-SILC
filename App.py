@@ -3,6 +3,9 @@ from MainWindow import MainWindow
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from io import BytesIO
+from array import array
+
 from MotorCommand import MotorCommand
 from vars import *
 
@@ -15,29 +18,29 @@ import serial
 
 class Worker(QObject):
     finished = pyqtSignal()
-    response = pyqtSignal()
-    bufferUpdated = pyqtSignal(tuple)
+    response = pyqtSignal(tuple)
 
     def __init__(self):
-        self.arduino = serial.Serial('/dev/ttyACM0', 9600)
+        super(Worker, self).__init__()
+        self.arduino = serial.Serial('/dev/ttyACM1', 9600)
         self.machine = MotorCommand()
         
         # estructura del mensaje
-        self.struct_fmt = '<Bh'
+        self.struct_fmt = '<BH'
         self.struct_len = calcsize(self.struct_fmt)
     
     def work(self):
         try:
-            if self.arduino.inWaiting():
-                msg = self.arduino.read(self.struct_len)
-                #print(msg.decode())
-                if len(msg) != 0:
+            while True:
+                if self.arduino.in_waiting > 0:
+                    msg = self.arduino.read(self.struct_len)
                     rxCom = unpack(self.struct_fmt, msg)
-                    self.bufferUpdated.emit(rxCom)
-                    #print(type(rxCom))
+                    self.response.emit(rxCom)
 
         except Exception as e:
             print(e)
+        
+        self.finished.emit()
 
 class App(QApplication):
     # constructor
@@ -59,8 +62,32 @@ class App(QApplication):
     
         self.main.show()
     
-    def sendCMD(self, id_actuador, cmd):
-        pass
+    def sendCMD(self, cmd, data=0):
+        self.worker.machine.cmd = cmd
+        self.worker.machine.data = data
+        
+        self.send_command()
+
+
+    def send_command(self):
+        buff = BytesIO()
+        self.worker.machine.serialize(buff)
+
+        packet = bytearray(buff.getvalue())
+        packet_str = array('B', packet).tostring()
+   
+        self.write_serial(packet_str)
+
+    def write_serial(self, data):
+        """
+        Write in the serial port.
+        """
+        #print(self.cmd)
+        #print("Hex: {}".format(to_hex(data)))
+        self.worker.arduino.flushInput()
+        self.worker.arduino.flushOutput()
+        self.worker.arduino.write(data)
+        
     
     def configureWidgetsActions(self):
         self.main.buttonHome.clicked.connect(self.actionHomeButton)
@@ -79,8 +106,9 @@ class App(QApplication):
         pass
     
     def actionHomeButton(self):
-        self.sendCMD(M1, SET_AT_ZERO)
-        self.main.buttonHome.setEnabled(False)
+        self.sendCMD(SET_AT_ZERO)
+        self.serialHandler()
+        #self.main.buttonHome.setEnabled(False)
 
     # dato muestra
     def actionBallSizeBox(self):
@@ -88,19 +116,23 @@ class App(QApplication):
 
     # adjust distance between ball and rock
     def actionBallHeightButton(self):
+        self.main.labelHeightValue.setText(str(round(random.random(),3)))
         self.sendCMD(M2, MEASURE_DISTANCE)
         self.sendCMD(M2,SET_DISTANCE)
 
     # confirm experiments data
     def actionConfirmButton(self):
-        self.disablePanel()
+        self.validate()
 
     # drop ball
     def actionLaunchButton(self):
         self.main.buttonLaunch.setEnabled(False)
         self.sendCMD(M1, DROP_BALL)
+        self.loadData()
+        self.main.buttonLaunch.setEnabled(True)
         
     def actionSaveButton(self):
+        # este botón no va, aca se debería cargar la row sola cuandoe l arduino dice q ta bien
         pass
 
     def actionFinishButton(self):
@@ -110,6 +142,7 @@ class App(QApplication):
     # llamada al worker
     def serialHandler(self):
         self.thread = QThread()
+        self.worker = Worker()
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.work)
         self.worker.finished.connect(self.thread.quit)
@@ -119,11 +152,68 @@ class App(QApplication):
         self.thread.start()
     
     def arduinoStatus(self, response):
+        print(response)
+        '''
         if response == 0:
             return
         else:
             return
+        '''
 
+    def disablePanel(self):
+        self.main.inputOrigin.setEnabled(False)
+        self.main.inputType.setEnabled(False)
+
+        self.main.inputIterations.setEnabled(False)
+        self.main.buttonHome.setEnabled(False)
+        self.main.comboBoxBallSize.setEnabled(False)
+        self.main.buttonRockHeight.setEnabled(False)
+        self.main.inputDistance.setEnabled(False)
+    
+    def enablePanel(self):
+        self.main.inputOrigin.setEnabled(True)
+        self.main.inputType.setEnabled(True)
+        
+        self.main.inputIterations.setEnabled(True)
+        self.main.buttonHome.setEnabled(True)
+        self.main.comboBoxBallSize.setEnabled(True)
+        self.main.buttonRockHeight.setEnabled(True)
+        self.main.inputDistance.setEnabled(True)
+
+    def checkBallSize(self):
+        if self.main.comboBoxBallSize.currentText() == "":
+            self.validation = False
+            self.main.validationDetails += "Seleccionar tamaño bola \n"
+    
+    def checkRockHeight(self):
+        if self.main.labelHeightValue.text() == "":
+            self.validation = False
+            self.main.validationDetails += "Medir altura \n"
+    
+    def checkInputDistance(self):
+        pass # revisar que los caracteres sean soolo numeros y no otras cosas
+
+
+    def validate(self):
+        self.validation = True
+        self.checkRockHeight()
+        self.checkBallSize()
+        
+        if self.validation == True:
+            self.main.buttonConfirm.setEnabled(False)
+            self.disablePanel()
+            self.main.buttonLaunch.setEnabled(True)
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("This is a message box")
+            msg.setInformativeText("This is additional information")
+            msg.setWindowTitle("MessageBox demo")
+            msg.setDetailedText(self.main.validationDetails)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
+
+        self.main.validationDetails = ""
 
     def transformText(self, text):
         text = sub(r"(_|-)+.", " ", text).title().replace(" ", "")
@@ -152,54 +242,3 @@ class App(QApplication):
             self.main.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.main.inputDistance.text()))
             self.main.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(self.experimentNaming())) #hash distintivo x exp
             self.main.iterations += 1
-        
-    def onMedirAltura(self):
-        self.main.labelHeightValue.setText(str(round(random.random(),3)))
-
-    def actionButtonLaunch(self):
-        # aki tiene q pasar toda la accion con el arduino 
-        # en resumen: soltar la bola 
-        # recibe un feedback del arduino q el experimento salió bien y permite "savearlo"
-        pass
-
-
-    def checkBallSize(self):
-        if self.main.comboBoxBallSize.currentText() == "":
-            self.validation = False
-            self.validationDetails += "Seleccionar tamaño bola \n"
-    
-    def checkRockHeight(self):
-        if self.main.labelHeightValue.text() == "":
-            self.validation = False
-            self.validationDetails += "Medir altura \n"
-    
-    def checkInputDistance(self):
-        pass # revisar que los caracteres sean soolo numeros y no otras cosas
-
-    def disablePanel(self):
-        self.main.inputIterations.setEnabled(False)
-        self.main.buttonHome.setEnabled(False)
-        self.main.comboBoxBallSize.setEnabled(False)
-        self.main.buttonRockHeight.setEnabled(False)
-        self.main.inputDistance.setEnabled(False)
-
-    def validate(self):
-        self.validation = True
-        self.checkRockHeight()
-        self.checkBallSize()
-        
-        if self.validation == True:
-            self.main.buttonConfirm.setEnabled(False)
-            self.disablePanel()
-            self.main.buttonLaunch.setEnabled(True)
-        else:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setText("This is a message box")
-            msg.setInformativeText("This is additional information")
-            msg.setWindowTitle("MessageBox demo")
-            msg.setDetailedText(self.validationDetails)
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.exec_()
-
-        self.validationDetails = ""
