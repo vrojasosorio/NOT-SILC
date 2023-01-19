@@ -41,11 +41,11 @@ class Worker(QObject):
 
 class App(QApplication):
     # constructor
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args):
+        QApplication.__init__(self, *args)
 
         # main objects 
-        self.main = None
+        #self.main = None
         self.worker = Worker()
 
         # main window
@@ -56,6 +56,8 @@ class App(QApplication):
         self.isExperimentRunning = False
         self.isAtZero = False
         self.isMoving = False
+    
+        self.main.show()
     
     def sendCMD(self, id_actuador, cmd):
         pass
@@ -91,7 +93,7 @@ class App(QApplication):
 
     # confirm experiments data
     def actionConfirmButton(self):
-        self.main.disablePanel()
+        self.disablePanel()
 
     # drop ball
     def actionLaunchButton(self):
@@ -132,48 +134,42 @@ class App(QApplication):
         return now.strftime("%Y%m%d%H%M%S")
 
     def experimentNaming(self):
-        sampleOrigin = self.transformText(self.inputOrigin.text())
-        sampleType = self.transformText(self.inputType.text())
+        sampleOrigin = self.transformText(self.main.inputOrigin.text())
+        sampleType = self.transformText(self.main.inputType.text())
         sampleDate = self.transformDate()
         return sampleDate + "_" + sampleOrigin + "_" + sampleType
 
     def loadData(self):
-        if self.inputIterations.text() == "":
-            self.inputIterations.setText("1")
+        if self.main.inputIterations.text() == "":
+            self.main.inputIterations.setText("1")
 
-        if  self.iterations < int(self.inputIterations.text()): 
-            rowPosition = self.tableWidget.rowCount()
-            self.tableWidget.insertRow(rowPosition)
+        if  self.main.iterations < int(self.main.inputIterations.text()): 
+            rowPosition = self.main.tableWidget.rowCount()
+            self.main.tableWidget.insertRow(rowPosition)
 
-            self.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(self.comboBoxBallSize.currentText()))
-            self.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(self.labelHeightValue.text()))
-            self.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.inputDistance.text()))
-            self.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(self.experimentNaming())) #hash distintivo x exp
-            self.iterations += 1
+            self.main.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(self.main.comboBoxBallSize.currentText()))
+            self.main.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(self.main.labelHeightValue.text()))
+            self.main.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.main.inputDistance.text()))
+            self.main.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(self.experimentNaming())) #hash distintivo x exp
+            self.main.iterations += 1
         
     def onMedirAltura(self):
-        self.labelHeightValue.setText(str(round(random.random(),3)))
+        self.main.labelHeightValue.setText(str(round(random.random(),3)))
 
     def actionButtonLaunch(self):
         # aki tiene q pasar toda la accion con el arduino 
         # en resumen: soltar la bola 
         # recibe un feedback del arduino q el experimento salió bien y permite "savearlo"
-        self.buttonSave.setEnabled(True)
+        pass
 
-
-    def clicks(self):
-        self.buttonSave.clicked.connect(self.loadData)
-        self.buttonRockHeight.clicked.connect(self.onMedirAltura)
-        self.buttonConfirm.clicked.connect(self.validate)
-        self.buttonLaunch.clicked.connect(self.actionButtonLaunch)
 
     def checkBallSize(self):
-        if self.comboBoxBallSize.currentText() == "":
+        if self.main.comboBoxBallSize.currentText() == "":
             self.validation = False
             self.validationDetails += "Seleccionar tamaño bola \n"
     
     def checkRockHeight(self):
-        if self.labelHeightValue.text() == "":
+        if self.main.labelHeightValue.text() == "":
             self.validation = False
             self.validationDetails += "Medir altura \n"
     
@@ -181,11 +177,11 @@ class App(QApplication):
         pass # revisar que los caracteres sean soolo numeros y no otras cosas
 
     def disablePanel(self):
-        self.inputIterations.setEnabled(False)
-        self.buttonHome.setEnabled(False)
-        self.comboBoxBallSize.setEnabled(False)
-        self.buttonRockHeight.setEnabled(False)
-        self.inputDistance.setEnabled(False)
+        self.main.inputIterations.setEnabled(False)
+        self.main.buttonHome.setEnabled(False)
+        self.main.comboBoxBallSize.setEnabled(False)
+        self.main.buttonRockHeight.setEnabled(False)
+        self.main.inputDistance.setEnabled(False)
 
     def validate(self):
         self.validation = True
@@ -193,9 +189,9 @@ class App(QApplication):
         self.checkBallSize()
         
         if self.validation == True:
-            self.buttonConfirm.setEnabled(False)
+            self.main.buttonConfirm.setEnabled(False)
             self.disablePanel()
-            self.buttonLaunch.setEnabled(True)
+            self.main.buttonLaunch.setEnabled(True)
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)

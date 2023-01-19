@@ -9,14 +9,15 @@ import datetime
 
 class MainWindow(QWidget):
 
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
+
+        self.parent = parent
         self.iterations = 0
         self.validationDetails = ""
         self.validation = False
  
         self.setupUI()
-        self.clicks()
     
     def setupUI(self):
         self.setWindowTitle("NOT SILC")
@@ -143,90 +144,7 @@ class MainWindow(QWidget):
 
         self.layout.addWidget(self.table, 0, 1, 3, 1)
 
-    def transformText(self, text):
-        text = sub(r"(_|-)+.", " ", text).title().replace(" ", "")
-        return "".join([text[0].lower(), text[1:]])
-    
-    def transformDate(self):
-        now = datetime.datetime.now()
-        return now.strftime("%Y%m%d%H%M%S")
 
-    def experimentNaming(self):
-        sampleOrigin = self.transformText(self.inputOrigin.text())
-        sampleType = self.transformText(self.inputType.text())
-        sampleDate = self.transformDate()
-        return sampleDate + "_" + sampleOrigin + "_" + sampleType
-
-    def loadData(self):
-        if self.inputIterations.text() == "":
-            self.inputIterations.setText("1")
-
-        if  self.iterations < int(self.inputIterations.text()): 
-            rowPosition = self.tableWidget.rowCount()
-            self.tableWidget.insertRow(rowPosition)
-
-            self.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(self.comboBoxBallSize.currentText()))
-            self.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(self.labelHeightValue.text()))
-            self.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.inputDistance.text()))
-            self.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(self.experimentNaming())) #hash distintivo x exp
-            self.iterations += 1
-        
-    def onMedirAltura(self):
-        self.labelHeightValue.setText(str(round(random.random(),3)))
-
-    def actionButtonLaunch(self):
-        # aki tiene q pasar toda la accion con el arduino 
-        # en resumen: soltar la bola 
-        # recibe un feedback del arduino q el experimento salió bien y permite "savearlo"
-        self.buttonSave.setEnabled(True)
-
-
-    def clicks(self):
-        self.buttonSave.clicked.connect(self.loadData)
-        self.buttonRockHeight.clicked.connect(self.onMedirAltura)
-        self.buttonConfirm.clicked.connect(self.validate)
-        self.buttonLaunch.clicked.connect(self.actionButtonLaunch)
-
-    def checkBallSize(self):
-        if self.comboBoxBallSize.currentText() == "":
-            self.validation = False
-            self.validationDetails += "Seleccionar tamaño bola \n"
-    
-    def checkRockHeight(self):
-        if self.labelHeightValue.text() == "":
-            self.validation = False
-            self.validationDetails += "Medir altura \n"
-    
-    def checkInputDistance(self):
-        pass # revisar que los caracteres sean soolo numeros y no otras cosas
-
-    def disablePanel(self):
-        self.inputIterations.setEnabled(False)
-        self.buttonHome.setEnabled(False)
-        self.comboBoxBallSize.setEnabled(False)
-        self.buttonRockHeight.setEnabled(False)
-        self.inputDistance.setEnabled(False)
-
-    def validate(self):
-        self.validation = True
-        self.checkRockHeight()
-        self.checkBallSize()
-        
-        if self.validation == True:
-            self.buttonConfirm.setEnabled(False)
-            self.disablePanel()
-            self.buttonLaunch.setEnabled(True)
-        else:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setText("This is a message box")
-            msg.setInformativeText("This is additional information")
-            msg.setWindowTitle("MessageBox demo")
-            msg.setDetailedText(self.validationDetails)
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.exec_()
-
-        self.validationDetails = ""
 
 
 

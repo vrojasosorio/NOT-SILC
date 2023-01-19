@@ -1,9 +1,19 @@
-from PyQt5.QtWidgets import QApplication
-from MainWindow import MainWindow
+# -*- coding: utf-8 -*-
 
+from App import App
+from PyQt5.Qt import *
+from pyqtgraph.Qt import QtCore, QtGui
+
+# Operating system
 import sys
+import time
 
-app = QApplication(sys.argv)
-w = MainWindow()
-w.show()
-sys.exit(app.exec_())
+def main(args):
+    global app
+
+    app = App(args)
+
+    app.exec_()
+
+if __name__ == "__main__":
+    main(sys.argv)
