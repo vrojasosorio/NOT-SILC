@@ -2,7 +2,6 @@
 
 from App import App
 from PyQt5.Qt import *
-from pyqtgraph.Qt import QtCore, QtGui
 
 # Operating system
 import sys
