@@ -106,6 +106,7 @@ class App(QApplication):
         pass
     
     def actionHomeButton(self):
+        self.main.buttonHome.setEnabled(False)
         self.sendCMD(SET_AT_ZERO)
         self.serialHandler()
 
@@ -157,15 +158,8 @@ class App(QApplication):
         #self.worker.finished.emit()
 
         if cmd == HOME:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setText("Toi en el home xsia")
-            msg.setInformativeText("This is additional information")
-            msg.setWindowTitle("MessageBox demo")
-            msg.setDetailedText(self.main.validationDetails)
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.exec_()
-            
+            self.showMessage("Action Complete","Toi en el home xsia","relleno")     
+            self.main.buttonHome.setEnabled(True)       
         else:
             print("No entré al if")
         return
@@ -189,6 +183,15 @@ class App(QApplication):
         self.main.comboBoxBallSize.setEnabled(True)
         self.main.buttonRockHeight.setEnabled(True)
         self.main.inputDistance.setEnabled(True)
+
+    def showMessage(self, title, text, information):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setInformativeText(information)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def checkBallSize(self):
         if self.main.comboBoxBallSize.currentText() == "":
