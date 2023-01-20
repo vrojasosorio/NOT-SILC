@@ -19,7 +19,7 @@ import serial
 class Worker(QObject):
     finished = pyqtSignal()
     response = pyqtSignal(tuple)
-
+    
     def __init__(self):
         super(Worker, self).__init__()
         self.arduino = serial.Serial('/dev/ttyACM1', 9600)
@@ -108,7 +108,6 @@ class App(QApplication):
     def actionHomeButton(self):
         self.sendCMD(SET_AT_ZERO)
         self.serialHandler()
-        #self.main.buttonHome.setEnabled(False)
 
     # dato muestra
     def actionBallSizeBox(self):
@@ -146,6 +145,7 @@ class App(QApplication):
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.work)
         self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.thread.wait)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.worker.response.connect(self.arduinoStatus)
@@ -153,12 +153,22 @@ class App(QApplication):
     
     def arduinoStatus(self, response):
         print(response)
-        '''
-        if response == 0:
-            return
+        cmd = response[0]
+        #self.worker.finished.emit()
+
+        if cmd == HOME:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Toi en el home xsia")
+            msg.setInformativeText("This is additional information")
+            msg.setWindowTitle("MessageBox demo")
+            msg.setDetailedText(self.main.validationDetails)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
+            
         else:
-            return
-        '''
+            print("No entré al if")
+        return
 
     def disablePanel(self):
         self.main.inputOrigin.setEnabled(False)

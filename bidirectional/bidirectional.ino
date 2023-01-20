@@ -24,6 +24,8 @@ union {
 #define DROP_BALL 1
 #define SET_AT_ZERO 2
 
+#define HOME 3
+
 bool readPacket() {
   if (Serial.available() == numBytes) {
     // do nothing and wait if serial buffer doesn't have enough bytes to read
@@ -51,7 +53,7 @@ void loop() {
         blinkLed(1000);
         delay(2000);
 
-        packet.bytes[0] = 5;
+        packet.bytes[0] = HOME;
         packet.bytes[1] = 6;
 
         for (int i = 0; i < numBytes; i++) {
