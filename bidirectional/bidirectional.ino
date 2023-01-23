@@ -21,12 +21,14 @@ union {
   } unpacked;
 } packet;
 
-#define DROP_BALL 1
-#define SET_AT_ZERO 2
+#define TAKE_BALL 0
+#define HOLD_BALL 1
+#define DROP_BALL 2
 
-#define HOME 3
+#define TAKEN 3
 #define SAVE_EXPERIMENT 4
 #define SAVE_DATA 5
+#define TAKEN 6
 
 bool readPacket() {
   if (Serial.available() == numBytes) {
@@ -52,11 +54,11 @@ void loop() {
         blinkLed(100);
         break;
         
-      case SET_AT_ZERO:
+      case TAKE_BALL:
         blinkLed(1000);
         delay(2000);
 
-        packet.bytes[0] = HOME;
+        packet.bytes[0] = TAKEN;
         packet.bytes[1] = 6;
         
         for (int i = 0; i < numBytes; i++) {

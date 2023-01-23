@@ -53,17 +53,16 @@ class MainWindow(QWidget):
         self.inputType = QLineEdit("", self)
         self.descriptionLayout.addWidget(self.inputType) 
 
-        # iterations
-        self.labelIterations = QLabel("Número de repeticiones", self)
-        self.buttonsLayout.addWidget(self.labelIterations) 
-        self.inputIterations = QLineEdit("", self)
-        self.buttonsLayout.addWidget(self.inputIterations) 
-
         # home button
         self.labelHome = QLabel("Set zero",self)
         self.buttonsLayout.addWidget(self.labelHome)
-        self.buttonHome = QPushButton("Home", self)
-        self.buttonsLayout.addWidget(self.buttonHome)
+        self.buttonTake = QPushButton("TAKE BALL", self)
+        self.buttonsLayout.addWidget(self.buttonTake)
+
+        # iterations
+        self.buttonHold = QPushButton("HOLD BALL", self)
+        self.buttonsLayout.addWidget(self.buttonHold) 
+        self.buttonHold.setEnabled(False)
 
         # ball size
         self.labelBallSize = QLabel("Tamaño bola", self)
@@ -96,14 +95,9 @@ class MainWindow(QWidget):
         self.controlLayout.addWidget(self.buttonLaunch, 0, 1)
         self.buttonLaunch.setEnabled(False)
 
-        # save
-        self.buttonSave = QPushButton("Save", self)
-        self.controlLayout.addWidget(self.buttonSave, 1, 0)
-        self.buttonSave.setEnabled(False)
-
         # Finish
         self.buttonFinish = QPushButton("Finish", self)
-        self.controlLayout.addWidget(self.buttonFinish, 1, 1)
+        self.controlLayout.addWidget(self.buttonFinish, 1, 0, 1, 2)
         self.buttonFinish.setEnabled(True)
 
         # table

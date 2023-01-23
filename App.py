@@ -91,13 +91,13 @@ class App(QApplication):
         
     
     def configureWidgetsActions(self):
-        self.main.buttonHome.clicked.connect(self.actionHomeButton)
+        self.main.buttonTake.clicked.connect(self.actionTakeButton)
+        self.main.buttonHold.clicked.connect(self.actionHoldButton)
         self.main.comboBoxBallSize.currentIndexChanged.connect(self.actionBallSizeBox)
         self.main.buttonRockHeight.clicked.connect(self.actionBallHeightButton)
 
         self.main.buttonConfirm.clicked.connect(self.actionConfirmButton)
         self.main.buttonLaunch.clicked.connect(self.actionLaunchButton)
-        self.main.buttonSave.clicked.connect(self.actionSaveButton)
         self.main.buttonFinish.clicked.connect(self.actionFinishButton)
 
     def move(self):
@@ -106,9 +106,14 @@ class App(QApplication):
     def brake(self):
         pass
     
-    def actionHomeButton(self):
-        self.main.buttonHome.setEnabled(False)
-        self.sendCMD(SET_AT_ZERO)
+    def actionTakeButton(self):
+        self.main.buttonTake.setEnabled(False)
+        self.sendCMD(TAKE_BALL)
+        self.serialHandler()
+    
+    def actionHoldButton(self):
+        self.main.buttonHold.setEnabled(False)
+        self.sendCMD(HOLD_BALL)
         self.serialHandler()
 
     # dato muestra
@@ -131,10 +136,6 @@ class App(QApplication):
         #self.sendCMD(M1, DROP_BALL)
         self.sendCMD(SAVE_EXPERIMENT)
         self.serialHandler()
-        
-    def actionSaveButton(self):
-        # este botón no va, aca se debería cargar la row sola cuandoe l arduino dice q ta bien
-        pass
 
     def actionFinishButton(self):
         # llamada a función q exporta un csv
@@ -157,9 +158,9 @@ class App(QApplication):
         print(response)
         cmd = response[0]
 
-        if cmd == HOME:
-            self.showMessage("Action Complete","Toi en el home xsia")     
-            self.main.buttonHome.setEnabled(True)
+        if cmd == TAKEN:
+            self.showMessage("Action Complete","The ball was succesfully taken by chupa")     
+            self.main.buttonHold.setEnabled(True)
             return       
         if cmd == SAVE_DATA:
             self.loadData()
@@ -172,8 +173,7 @@ class App(QApplication):
         self.main.inputOrigin.setEnabled(False)
         self.main.inputType.setEnabled(False)
 
-        self.main.inputIterations.setEnabled(False)
-        self.main.buttonHome.setEnabled(False)
+        self.main.buttonTake.setEnabled(False)
         self.main.comboBoxBallSize.setEnabled(False)
         self.main.buttonRockHeight.setEnabled(False)
         self.main.inputDistance.setEnabled(False)
@@ -182,8 +182,7 @@ class App(QApplication):
         self.main.inputOrigin.setEnabled(True)
         self.main.inputType.setEnabled(True)
         
-        self.main.inputIterations.setEnabled(True)
-        self.main.buttonHome.setEnabled(True)
+        self.main.buttonTake.setEnabled(True)
         self.main.comboBoxBallSize.setEnabled(True)
         self.main.buttonRockHeight.setEnabled(True)
         self.main.inputDistance.setEnabled(True)
