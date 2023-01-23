@@ -2,11 +2,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from re import sub
-
-import random
-import datetime
-
 class MainWindow(QWidget):
 
     def __init__(self, parent):
@@ -109,7 +104,7 @@ class MainWindow(QWidget):
         # Finish
         self.buttonFinish = QPushButton("Finish", self)
         self.controlLayout.addWidget(self.buttonFinish, 1, 1)
-        self.buttonFinish.setEnabled(False)
+        self.buttonFinish.setEnabled(True)
 
         # table
         self.table= QTabWidget()

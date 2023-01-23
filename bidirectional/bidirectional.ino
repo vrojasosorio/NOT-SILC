@@ -25,6 +25,8 @@ union {
 #define SET_AT_ZERO 2
 
 #define HOME 3
+#define SAVE_EXPERIMENT 4
+#define SAVE_DATA 5
 
 bool readPacket() {
   if (Serial.available() == numBytes) {
@@ -49,12 +51,26 @@ void loop() {
       case DROP_BALL:
         blinkLed(100);
         break;
+        
       case SET_AT_ZERO:
         blinkLed(1000);
         delay(2000);
 
         packet.bytes[0] = HOME;
         packet.bytes[1] = 6;
+        
+        for (int i = 0; i < numBytes; i++) {
+          Serial.write(packet.bytes[i]);
+        }
+        Serial.flush();
+        break;
+        
+      case SAVE_EXPERIMENT:
+        blinkLed(500);
+        delay(2000);
+
+        packet.bytes[0] = SAVE_DATA;
+        packet.bytes[1] = 9;
 
         for (int i = 0; i < numBytes; i++) {
           Serial.write(packet.bytes[i]);
@@ -63,8 +79,6 @@ void loop() {
         break;
     }
   }
-
-
 }
 
 void blinkLed(int t) {
