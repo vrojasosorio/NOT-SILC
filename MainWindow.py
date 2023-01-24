@@ -53,17 +53,6 @@ class MainWindow(QWidget):
         self.inputType = QLineEdit("", self)
         self.descriptionLayout.addWidget(self.inputType) 
 
-        # home button
-        self.labelHome = QLabel("Set zero",self)
-        self.buttonsLayout.addWidget(self.labelHome)
-        self.buttonTake = QPushButton("TAKE BALL", self)
-        self.buttonsLayout.addWidget(self.buttonTake)
-
-        # iterations
-        self.buttonHold = QPushButton("HOLD BALL", self)
-        self.buttonsLayout.addWidget(self.buttonHold) 
-        self.buttonHold.setEnabled(False)
-
         # ball size
         self.labelBallSize = QLabel("Tamaño bola", self)
         self.buttonsLayout.addWidget(self.labelBallSize)
@@ -71,19 +60,35 @@ class MainWindow(QWidget):
         self.comboBoxBallSize.addItems(["","Small", "Medium", "Large"])
         self.buttonsLayout.addWidget(self.comboBoxBallSize)
 
+        # chupa buttons
+        self.labelHome = QLabel("Set zero",self)
+        self.buttonsLayout.addWidget(self.labelHome)
+        self.buttonTake = QPushButton("TAKE BALL", self)
+        self.buttonsLayout.addWidget(self.buttonTake)
+
+        self.buttonHold = QPushButton("HOLD BALL", self)
+        self.buttonsLayout.addWidget(self.buttonHold) 
+        self.buttonHold.setEnabled(False)
+
+
         # rock height
         self.labelRockHeight = QLabel("Altura rock", self)
         self.buttonsLayout.addWidget(self.labelRockHeight)
         self.buttonRockHeight = QPushButton("Medir altura", self)
         self.buttonsLayout.addWidget(self.buttonRockHeight)
-        self.labelHeightValue = QLabel("", self)
-        self.buttonsLayout.addWidget(self.labelHeightValue)
+        self.buttonRockHeight.setEnabled(False)
         
-        # distance 
+        # set distance 
         self.labelDistance = QLabel("Distancia bola-roca", self)
         self.buttonsLayout.addWidget(self.labelDistance)
         self.inputDistance = QLineEdit("", self)
         self.buttonsLayout.addWidget(self.inputDistance)
+        self.inputDistance.setEnabled(False)
+
+        # adjust distance
+        self.buttonAdjust = QPushButton("SET DISTANCE", self)
+        self.buttonsLayout.addWidget(self.buttonAdjust)
+        self.buttonAdjust.setEnabled(False)
 
         # confirm
         self.buttonConfirm= QPushButton("Confirm", self)

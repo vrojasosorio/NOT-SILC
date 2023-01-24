@@ -25,10 +25,11 @@ union {
 #define HOLD_BALL 1
 #define DROP_BALL 2
 
-#define TAKEN 3
-#define SAVE_EXPERIMENT 4
-#define SAVE_DATA 5
-#define TAKEN 6
+
+// responses
+#define TAKEN 10
+#define HELD 11
+#define DROPPED 12
 
 bool readPacket() {
   if (Serial.available() == numBytes) {
@@ -50,9 +51,6 @@ void setup() {
 void loop() {
   if (readPacket() == true) {
     switch (packet.unpacked.cmd) {
-      case DROP_BALL:
-        blinkLed(100);
-        break;
         
       case TAKE_BALL:
         blinkLed(1000);
@@ -66,19 +64,34 @@ void loop() {
         }
         Serial.flush();
         break;
+      
+      case HOLD_BALL:
+        blinkLed(1000);
+        delay(1000);
+
+        packet.bytes[0] = HELD;
+        packet.bytes[1] = 6;
         
-      case SAVE_EXPERIMENT:
-        blinkLed(500);
-        delay(2000);
-
-        packet.bytes[0] = SAVE_DATA;
-        packet.bytes[1] = 9;
-
         for (int i = 0; i < numBytes; i++) {
           Serial.write(packet.bytes[i]);
         }
         Serial.flush();
         break;
+
+      case DROP_BALL:
+        blinkLed(1000);
+        delay(1000);
+
+        packet.bytes[0] = DROPPED;
+        packet.bytes[1] = 6;
+        
+        for (int i = 0; i < numBytes; i++) {
+          Serial.write(packet.bytes[i]);
+        }
+        
+        Serial.flush();
+        break;
+        
     }
   }
 }

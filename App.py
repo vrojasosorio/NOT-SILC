@@ -133,8 +133,7 @@ class App(QApplication):
     # drop ball
     def actionLaunchButton(self):
         self.main.buttonLaunch.setEnabled(False)
-        #self.sendCMD(M1, DROP_BALL)
-        self.sendCMD(SAVE_EXPERIMENT)
+        self.sendCMD(DROP_BALL)
         self.serialHandler()
 
     def actionFinishButton(self):
@@ -162,9 +161,17 @@ class App(QApplication):
             self.showMessage("Action Complete","The ball was succesfully taken by chupa")     
             self.main.buttonHold.setEnabled(True)
             return       
-        if cmd == SAVE_DATA:
+
+        if cmd == HELD:
+            self.showMessage("Action Complete","")     
+            self.main.buttonRockHeight.setEnabled(True)
+            return  
+
+        if cmd == DROPPED:    
             self.loadData()
             self.main.buttonLaunch.setEnabled(True)
+            return  
+
         else:
             print("No entré al if")
         return
