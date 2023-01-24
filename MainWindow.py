@@ -74,9 +74,9 @@ class MainWindow(QWidget):
         # rock height
         self.labelRockHeight = QLabel("Altura rock", self)
         self.buttonsLayout.addWidget(self.labelRockHeight)
-        self.buttonRockHeight = QPushButton("Medir altura", self)
-        self.buttonsLayout.addWidget(self.buttonRockHeight)
-        self.buttonRockHeight.setEnabled(False)
+        self.buttonMeasure = QPushButton("yanosirvo :(", self)
+        self.buttonsLayout.addWidget(self.buttonMeasure)
+        self.buttonMeasure.setEnabled(False)
         
         # set distance 
         self.labelDistance = QLabel("Distancia bola-roca", self)

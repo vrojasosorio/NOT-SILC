@@ -21,15 +21,19 @@ union {
   } unpacked;
 } packet;
 
-#define TAKE_BALL 0
+#define TAKE_BALL 2
 #define HOLD_BALL 1
-#define DROP_BALL 2
+#define DROP_BALL 3
 
+#define SET_DISTANCE 9
 
 // responses
 #define TAKEN 10
 #define HELD 11
 #define DROPPED 12
+
+#define SETTED 13
+
 
 bool readPacket() {
   if (Serial.available() == numBytes) {
@@ -66,7 +70,7 @@ void loop() {
         break;
       
       case HOLD_BALL:
-        blinkLed(1000);
+      
         delay(1000);
 
         packet.bytes[0] = HELD;
@@ -91,7 +95,39 @@ void loop() {
         
         Serial.flush();
         break;
+
+      case MEASURE_DISTANCE:
+        delay(3000);
+        packet.bytes[0] = MEASURED;
+        packet.bytes[1] = 6;
         
+        for (int i = 0; i < numBytes; i++) {
+          Serial.write(packet.bytes[i]);
+        }
+        
+        Serial.flush();
+        break;
+
+
+      case SET_DISTANCE:
+        if (packet.unpacked.data > 10) {
+          digitalWrite(13, HIGH);
+          delay(5000);
+          digitalWrite(13,LOW);
+          
+        } else {
+          blinkLed(500);
+        }
+
+        packet.bytes[0] = ADJUSTED;
+        packet.bytes[1] = 6;
+        
+        for (int i = 0; i < numBytes; i++) {
+          Serial.write(packet.bytes[i]);
+        }
+        
+        Serial.flush();
+        break;        
     }
   }
 }

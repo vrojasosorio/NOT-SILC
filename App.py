@@ -16,7 +16,7 @@ import random
 import datetime
 import serial
 
-arduino = serial.Serial('/dev/ttyACM0', 9600)
+arduino = serial.Serial('/dev/ttyACM0', 115200)
 machine = MotorCommand()
 
 class Worker(QObject):
@@ -64,7 +64,7 @@ class App(QApplication):
     
         self.main.show()
     
-    def sendCMD(self, cmd, data=0):
+    def sendCMD(self, cmd, data):
         machine.cmd = cmd
         machine.data = data
         
@@ -91,13 +91,15 @@ class App(QApplication):
         
     
     def configureWidgetsActions(self):
+        self.main.comboBoxBallSize.currentIndexChanged.connect(self.actionBallSizeBox)
+
         self.main.buttonTake.clicked.connect(self.actionTakeButton)
         self.main.buttonHold.clicked.connect(self.actionHoldButton)
-        self.main.comboBoxBallSize.currentIndexChanged.connect(self.actionBallSizeBox)
-        self.main.buttonRockHeight.clicked.connect(self.actionBallHeightButton)
+        self.main.buttonLaunch.clicked.connect(self.actionLaunchButton)
+
+        self.main.buttonAdjust.clicked.connect(self.actionAdjustButton)
 
         self.main.buttonConfirm.clicked.connect(self.actionConfirmButton)
-        self.main.buttonLaunch.clicked.connect(self.actionLaunchButton)
         self.main.buttonFinish.clicked.connect(self.actionFinishButton)
 
     def move(self):
@@ -106,38 +108,37 @@ class App(QApplication):
     def brake(self):
         pass
     
-    def actionTakeButton(self):
-        self.main.buttonTake.setEnabled(False)
-        self.sendCMD(TAKE_BALL)
-        self.serialHandler()
-    
-    def actionHoldButton(self):
-        self.main.buttonHold.setEnabled(False)
-        self.sendCMD(HOLD_BALL)
-        self.serialHandler()
-
     # dato muestra
     def actionBallSizeBox(self):
         pass
 
+    def actionTakeButton(self):
+        self.main.buttonTake.setEnabled(False)
+        self.sendCMD(TAKE_BALL, 0)
+        self.serialHandler()
+    
+    def actionHoldButton(self):
+        self.main.buttonHold.setEnabled(False)
+        self.sendCMD(HOLD_BALL, 0)
+        self.serialHandler()
+
+    # drop ball
+    def actionLaunchButton(self):
+        self.main.buttonLaunch.setEnabled(False)
+        self.sendCMD(DROP_BALL, 0)
+        self.serialHandler()
+
     # adjust distance between ball and rock
-    def actionBallHeightButton(self):
-        self.main.labelHeightValue.setText(str(round(random.random(),3)))
-        self.sendCMD(M2, MEASURE_DISTANCE)
-        self.sendCMD(M2,SET_DISTANCE)
+    def actionAdjustButton(self):
+        distance = int(self.main.inputDistance.text())
+        self.sendCMD(SET_DISTANCE, distance)
 
     # confirm experiments data
     def actionConfirmButton(self):
         self.validate()
 
-    # drop ball
-    def actionLaunchButton(self):
-        self.main.buttonLaunch.setEnabled(False)
-        self.sendCMD(DROP_BALL)
-        self.serialHandler()
-
     def actionFinishButton(self):
-        # llamada a función q exporta un csv
+        self.main.buttonTake.setEnabled(True)
         pass
 
     # llamada al worker
@@ -163,15 +164,19 @@ class App(QApplication):
             return       
 
         if cmd == HELD:
-            self.showMessage("Action Complete","")     
-            self.main.buttonRockHeight.setEnabled(True)
+            self.showMessage("Action Complete","Valvula y motor off")    
+            self.main.inputDistance.setEnabled(True) 
+            self.main.buttonAdjust.setEnabled(True)
             return  
 
         if cmd == DROPPED:    
             self.loadData()
             self.main.buttonLaunch.setEnabled(True)
             return  
-
+               
+        if cmd == SETTED:
+            self.main.buttonLaunch.setEnabled(True)
+            return
         else:
             print("No entré al if")
         return
@@ -182,7 +187,7 @@ class App(QApplication):
 
         self.main.buttonTake.setEnabled(False)
         self.main.comboBoxBallSize.setEnabled(False)
-        self.main.buttonRockHeight.setEnabled(False)
+        self.main.buttonMeasure.setEnabled(False)
         self.main.inputDistance.setEnabled(False)
     
     def enablePanel(self):
@@ -191,7 +196,7 @@ class App(QApplication):
         
         self.main.buttonTake.setEnabled(True)
         self.main.comboBoxBallSize.setEnabled(True)
-        self.main.buttonRockHeight.setEnabled(True)
+        self.main.buttonMeasure.setEnabled(True)
         self.main.inputDistance.setEnabled(True)
 
     def showMessage(self, title, text):
@@ -216,9 +221,7 @@ class App(QApplication):
             self.main.validationDetails += "Seleccionar tamaño bola \n"
     
     def checkRockHeight(self):
-        if self.main.labelHeightValue.text() == "":
-            self.validation = False
-            self.main.validationDetails += "Medir altura \n"
+        pass
     
     def checkInputDistance(self):
         pass # revisar que los caracteres sean soolo numeros y no otras cosas
@@ -234,11 +237,9 @@ class App(QApplication):
             self.disablePanel()
             self.main.buttonLaunch.setEnabled(True)
         else:
-            #self.showWarningMessage(" ","Validation error","Some fields were not filled")
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
             msg.setText("This is a message box")
-            msg.setInformativeText("This is additional information")
             msg.setWindowTitle("MessageBox demo")
             msg.setDetailedText(self.main.validationDetails)
             msg.setStandardButtons(QMessageBox.Ok)
@@ -269,7 +270,7 @@ class App(QApplication):
         self.main.tableWidget.insertRow(rowPosition)
 
         self.main.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(self.main.comboBoxBallSize.currentText()))
-        self.main.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(self.main.labelHeightValue.text()))
+        self.main.tableWidget.setItem(rowPosition, 1, QTableWidgetItem("hola"))
         self.main.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(self.main.inputDistance.text()))
         self.main.tableWidget.setItem(rowPosition, 3, QTableWidgetItem(self.experimentNaming())) #hash distintivo x exp
         self.main.iterations += 1
