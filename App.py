@@ -9,14 +9,15 @@ from array import array
 from MotorCommand import MotorCommand
 from vars import *
 
-from re import sub
+
+from re import sub, match
 from struct import *
 
 import random
 import datetime
 import serial
 
-arduino = serial.Serial('/dev/ttyACM0', 115200)
+arduino = serial.Serial('/dev/ttyACM2', 9600)
 machine = MotorCommand()
 
 class Worker(QObject):
@@ -61,7 +62,7 @@ class App(QApplication):
         self.isExperimentRunning = False
         self.isAtZero = False
         self.isMoving = False
-    
+
         self.main.show()
     
     def sendCMD(self, cmd, data):
@@ -122,16 +123,19 @@ class App(QApplication):
         self.sendCMD(HOLD_BALL, 0)
         self.serialHandler()
 
+
+    # adjust distance between ball and rock
+    def actionAdjustButton(self):
+        distance = self.main.inputDistance.text()
+        if self.checkInputDistance(distance):
+            self.sendCMD(SET_DISTANCE, int(distance))
+            self.serialHandler()
+
     # drop ball
     def actionLaunchButton(self):
         self.main.buttonLaunch.setEnabled(False)
         self.sendCMD(DROP_BALL, 0)
         self.serialHandler()
-
-    # adjust distance between ball and rock
-    def actionAdjustButton(self):
-        distance = int(self.main.inputDistance.text())
-        self.sendCMD(SET_DISTANCE, distance)
 
     # confirm experiments data
     def actionConfirmButton(self):
@@ -159,12 +163,15 @@ class App(QApplication):
         cmd = response[0]
 
         if cmd == TAKEN:
-            self.showMessage("Action Complete","The ball was succesfully taken by chupa")     
+            self.showConfirmMessage("Confirm action","The ball is set in place?")
+            # esto está peligroso 
+            while self.reply == QMessageBox.No: 
+                self.showConfirmMessage("Confirm action","The ball is set in place?")
             self.main.buttonHold.setEnabled(True)
             return       
 
         if cmd == HELD:
-            self.showMessage("Action Complete","Valvula y motor off")    
+            self.showMessage("Action Complete","Valve and motor are off")    
             self.main.inputDistance.setEnabled(True) 
             self.main.buttonAdjust.setEnabled(True)
             return  
@@ -187,7 +194,6 @@ class App(QApplication):
 
         self.main.buttonTake.setEnabled(False)
         self.main.comboBoxBallSize.setEnabled(False)
-        self.main.buttonMeasure.setEnabled(False)
         self.main.inputDistance.setEnabled(False)
     
     def enablePanel(self):
@@ -196,7 +202,6 @@ class App(QApplication):
         
         self.main.buttonTake.setEnabled(True)
         self.main.comboBoxBallSize.setEnabled(True)
-        self.main.buttonMeasure.setEnabled(True)
         self.main.inputDistance.setEnabled(True)
 
     def showMessage(self, title, text):
@@ -215,6 +220,17 @@ class App(QApplication):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
+    def showConfirmMessage(self, title, text):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Question)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No )
+        self.reply = msg.exec_()
+
+
+
+
     def checkBallSize(self):
         if self.main.comboBoxBallSize.currentText() == "":
             self.validation = False
@@ -223,8 +239,15 @@ class App(QApplication):
     def checkRockHeight(self):
         pass
     
-    def checkInputDistance(self):
-        pass # revisar que los caracteres sean soolo numeros y no otras cosas
+    def checkInputDistance(self,input):
+        if not input:
+            self.showWarningMessage("Incomplete","The distance needs to be defined")
+        elif not bool(match('^[0-9]+$', input)):
+            self.showWarningMessage("Wrong parameter", "The distance must only contain numbers")
+        elif int(input) > 350:
+            self.showWarningMessage("Wrong parameter", "The maximum distance is 350mm")
+        else:
+            return True
 
 
     def validate(self):

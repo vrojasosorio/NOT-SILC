@@ -21,8 +21,8 @@ union {
   } unpacked;
 } packet;
 
-#define TAKE_BALL 2
 #define HOLD_BALL 1
+#define TAKE_BALL 2
 #define DROP_BALL 3
 
 #define SET_DISTANCE 9
@@ -96,21 +96,8 @@ void loop() {
         Serial.flush();
         break;
 
-      case MEASURE_DISTANCE:
-        delay(3000);
-        packet.bytes[0] = MEASURED;
-        packet.bytes[1] = 6;
-        
-        for (int i = 0; i < numBytes; i++) {
-          Serial.write(packet.bytes[i]);
-        }
-        
-        Serial.flush();
-        break;
-
-
       case SET_DISTANCE:
-        if (packet.unpacked.data > 10) {
+        if (packet.unpacked.data > 150) {
           digitalWrite(13, HIGH);
           delay(5000);
           digitalWrite(13,LOW);
@@ -119,7 +106,7 @@ void loop() {
           blinkLed(500);
         }
 
-        packet.bytes[0] = ADJUSTED;
+        packet.bytes[0] = SETTED;
         packet.bytes[1] = 6;
         
         for (int i = 0; i < numBytes; i++) {
