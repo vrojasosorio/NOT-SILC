@@ -63,6 +63,7 @@ class App(QApplication):
         self.isAtZero = False
         self.isMoving = False
 
+        self.main.center()
         self.main.show()
     
     def sendCMD(self, cmd, data):

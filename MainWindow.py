@@ -22,14 +22,14 @@ class MainWindow(QWidget):
 
         # experiment info
         self.descriptionPanel = QGroupBox("Description")
-        self.descriptionPanel.setFixedSize(200,150)
+        self.descriptionPanel.setFixedSize(200,200)
         self.layout.addWidget(self.descriptionPanel)
         self.descriptionLayout = QGridLayout()
         self.descriptionPanel.setLayout(self.descriptionLayout)
 
         # params panel, GB can't add widget
-        self.buttonsPanel = QGroupBox("Initial params")
-        self.buttonsPanel.setFixedSize(200,350)
+        self.buttonsPanel = QGroupBox("Initial parameters")
+        self.buttonsPanel.setFixedSize(200,210)
         self.layout.addWidget(self.buttonsPanel)
         self.buttonsLayout = QGridLayout()
         self.buttonsPanel.setLayout(self.buttonsLayout)
@@ -42,53 +42,45 @@ class MainWindow(QWidget):
         self.controlPanel.setLayout(self.controlLayout)
 
         # origin
-        self.labelOrigin = QLabel("Origen de la muestra", self)
+        self.labelOrigin = QLabel("Sample's origin", self)
         self.descriptionLayout.addWidget(self.labelOrigin) 
         self.inputOrigin = QLineEdit("", self)
         self.descriptionLayout.addWidget(self.inputOrigin) 
 
         # tipo de muestra
-        self.labelType = QLabel("Tipo de la muestra", self)
+        self.labelType = QLabel("Type of sample", self)
         self.descriptionLayout.addWidget(self.labelType) 
         self.inputType = QLineEdit("", self)
         self.descriptionLayout.addWidget(self.inputType) 
 
         # ball size
-        self.labelBallSize = QLabel("Tamaño bola", self)
-        self.buttonsLayout.addWidget(self.labelBallSize)
+        self.labelBallSize = QLabel("Size of ball", self)
+        self.descriptionLayout.addWidget(self.labelBallSize)
         self.comboBoxBallSize = QComboBox()
         self.comboBoxBallSize.addItems(["","Small", "Medium", "Large"])
-        self.buttonsLayout.addWidget(self.comboBoxBallSize)
+        self.descriptionLayout.addWidget(self.comboBoxBallSize)
 
         # chupa buttons
-        self.labelHome = QLabel("Set zero",self)
+        self.labelHome = QLabel("Chupa ACTIONS XD",self)
         self.buttonsLayout.addWidget(self.labelHome)
-        self.buttonTake = QPushButton("TAKE BALL", self)
+        self.buttonTake = QPushButton("LOAD BALL", self)
         self.buttonsLayout.addWidget(self.buttonTake)
 
         self.buttonHold = QPushButton("HOLD BALL", self)
         self.buttonsLayout.addWidget(self.buttonHold) 
         self.buttonHold.setEnabled(False)
-
-
-        # rock height
-        self.labelRockHeight = QLabel("Altura rock", self)
-        self.buttonsLayout.addWidget(self.labelRockHeight)
-        self.buttonMeasure = QPushButton("yanosirvo :(", self)
-        self.buttonsLayout.addWidget(self.buttonMeasure)
-        self.buttonMeasure.setEnabled(False)
-        
+       
         # set distance 
-        self.labelDistance = QLabel("Distancia bola-roca", self)
+        self.labelDistance = QLabel("Release Height", self)
         self.buttonsLayout.addWidget(self.labelDistance)
         self.inputDistance = QLineEdit("", self)
         self.buttonsLayout.addWidget(self.inputDistance)
-        self.inputDistance.setEnabled(False)
+        #self.inputDistance.setEnabled(False)
 
         # adjust distance
         self.buttonAdjust = QPushButton("SET DISTANCE", self)
         self.buttonsLayout.addWidget(self.buttonAdjust)
-        self.buttonAdjust.setEnabled(False)
+        #self.buttonAdjust.setEnabled(False)
 
         # confirm
         self.buttonConfirm= QPushButton("Confirm", self)
@@ -134,9 +126,16 @@ class MainWindow(QWidget):
 
         self.table.addTab(tab1, "&Table")
         self.table.addTab(tab2, "&Console")
-        self.table.setFixedSize(500,600)
+        self.table.setFixedSize(500,525)
 
         self.layout.addWidget(self.table, 0, 1, 3, 1)
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
 
 
 
