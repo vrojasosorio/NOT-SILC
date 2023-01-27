@@ -22,7 +22,7 @@ class MainWindow(QWidget):
 
         # experiment info
         self.descriptionPanel = QGroupBox("Description")
-        self.descriptionPanel.setFixedSize(200,200)
+        self.descriptionPanel.setFixedSize(200,225)
         self.layout.addWidget(self.descriptionPanel)
         self.descriptionLayout = QGridLayout()
         self.descriptionPanel.setLayout(self.descriptionLayout)
@@ -34,6 +34,7 @@ class MainWindow(QWidget):
         self.buttonsLayout = QGridLayout()
         self.buttonsPanel.setLayout(self.buttonsLayout)
 
+
         # control panel
         self.controlPanel = QGroupBox("Control of experiments")
         self.controlPanel.setFixedSize(200,100)
@@ -43,30 +44,37 @@ class MainWindow(QWidget):
 
         # origin
         self.labelOrigin = QLabel("Sample's origin", self)
-        self.descriptionLayout.addWidget(self.labelOrigin) 
+        self.descriptionLayout.addWidget(self.labelOrigin, 0, 0, 1, 2) 
         self.inputOrigin = QLineEdit("", self)
-        self.descriptionLayout.addWidget(self.inputOrigin) 
+        self.descriptionLayout.addWidget(self.inputOrigin, 1, 0, 1, 2) 
 
         # tipo de muestra
         self.labelType = QLabel("Type of sample", self)
-        self.descriptionLayout.addWidget(self.labelType) 
+        self.descriptionLayout.addWidget(self.labelType, 2, 0, 1, 2) 
         self.inputType = QLineEdit("", self)
-        self.descriptionLayout.addWidget(self.inputType) 
+        self.descriptionLayout.addWidget(self.inputType, 3, 0, 1, 2) 
 
         # ball size
         self.labelBallSize = QLabel("Size of ball", self)
-        self.descriptionLayout.addWidget(self.labelBallSize)
+        self.descriptionLayout.addWidget(self.labelBallSize, 4, 0, 1, 2)
         self.comboBoxBallSize = QComboBox()
         self.comboBoxBallSize.addItems(["","Small", "Medium", "Large"])
-        self.descriptionLayout.addWidget(self.comboBoxBallSize)
+        self.descriptionLayout.addWidget(self.comboBoxBallSize, 5, 0, 1, 2)
+
+        # description buttons
+        self.buttonConfirm = QPushButton("Confirm", self)
+        self.descriptionLayout.addWidget(self.buttonConfirm, 6, 0)
+
+        self.buttonEdit = QPushButton("Edit", self)
+        self.descriptionLayout.addWidget(self.buttonEdit, 6, 1) 
 
         # chupa buttons
         self.labelHome = QLabel("Chupa ACTIONS XD",self)
         self.buttonsLayout.addWidget(self.labelHome)
-        self.buttonTake = QPushButton("LOAD BALL", self)
+        self.buttonTake = QPushButton("Load ball", self)
         self.buttonsLayout.addWidget(self.buttonTake)
 
-        self.buttonHold = QPushButton("HOLD BALL", self)
+        self.buttonHold = QPushButton("Hold ball", self)
         self.buttonsLayout.addWidget(self.buttonHold) 
         self.buttonHold.setEnabled(False)
        
@@ -78,7 +86,7 @@ class MainWindow(QWidget):
         #self.inputDistance.setEnabled(False)
 
         # adjust distance
-        self.buttonAdjust = QPushButton("SET DISTANCE", self)
+        self.buttonAdjust = QPushButton("Set distance", self)
         self.buttonsLayout.addWidget(self.buttonAdjust)
         #self.buttonAdjust.setEnabled(False)
 
@@ -88,7 +96,7 @@ class MainWindow(QWidget):
         #self.buttonConfirm.setEnabled(False)
 
         # launch
-        self.buttonLaunch= QPushButton("Launch", self)
+        self.buttonLaunch= QPushButton("LAUNCH", self)
         self.controlLayout.addWidget(self.buttonLaunch, 0, 1)
         self.buttonLaunch.setEnabled(False)
 
