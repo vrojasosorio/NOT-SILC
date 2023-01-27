@@ -16,8 +16,9 @@ from struct import *
 import random
 import datetime
 import serial
+import time
 
-arduino = serial.Serial('/dev/ttyACM2', 9600)
+arduino = serial.Serial('/dev/ttyACM0', 115200)
 machine = MotorCommand()
 
 class Worker(QObject):
@@ -94,14 +95,14 @@ class App(QApplication):
     
     def configureWidgetsActions(self):
         self.main.comboBoxBallSize.currentIndexChanged.connect(self.actionBallSizeBox)
+        self.main.buttonConfirm.clicked.connect(self.actionConfirmButton)
 
         self.main.buttonTake.clicked.connect(self.actionTakeButton)
         self.main.buttonHold.clicked.connect(self.actionHoldButton)
-        self.main.buttonLaunch.clicked.connect(self.actionLaunchButton)
-
         self.main.buttonAdjust.clicked.connect(self.actionAdjustButton)
 
-        self.main.buttonConfirm.clicked.connect(self.actionConfirmButton)
+        self.main.buttonLaunch.clicked.connect(self.actionLaunchButton)
+        self.main.buttonReset.clicked.connect(self.actionResetButton)
         self.main.buttonFinish.clicked.connect(self.actionFinishButton)
 
     def move(self):
@@ -134,13 +135,24 @@ class App(QApplication):
 
     # drop ball
     def actionLaunchButton(self):
+        #self.validate()
         self.main.buttonLaunch.setEnabled(False)
         self.sendCMD(DROP_BALL, 0)
         self.serialHandler()
 
+    def actionResetButton(self):
+        pass
+
     # confirm experiments data
     def actionConfirmButton(self):
-        self.validate()
+        if not self.validate():
+            self.showWarningMessage("fsdf","sdf",self.main.validationDetails)
+
+            self.main.validationDetails = ""
+        else:
+            self.main.inputOrigin.setEnabled(False)
+            self.main.inputType.setEnabled(False)
+            self.main.comboBoxBallSize.setEnabled(False)
 
     def actionFinishButton(self):
         self.main.buttonTake.setEnabled(True)
@@ -160,49 +172,57 @@ class App(QApplication):
         self.thread.start()
     
     def arduinoResponse(self, response):
-        print(response)
+        
         cmd = response[0]
+        print(cmd)
 
         if cmd == TAKEN:
             self.showConfirmMessage("Confirm action","The ball is set in place?")
             # esto está peligroso 
             while self.reply == QMessageBox.No: 
+                time.sleep(3)
                 self.showConfirmMessage("Confirm action","The ball is set in place?")
+                break
             self.main.buttonHold.setEnabled(True)
             return       
 
-        if cmd == HELD:
+        elif cmd == HELD:
             self.showMessage("Action Complete","Valve and motor are off")    
             self.main.inputDistance.setEnabled(True) 
             self.main.buttonAdjust.setEnabled(True)
             return  
 
-        if cmd == DROPPED:    
+        elif cmd == DROPPED:    
             self.loadData()
             self.main.buttonLaunch.setEnabled(True)
             return  
                
-        if cmd == SETTED:
+        elif cmd == SETTED:
             self.main.buttonLaunch.setEnabled(True)
             return
+        
         else:
-            print("No entré al if")
+            print("NOT_SILC")
+            return
+
         return
 
     def disablePanel(self):
         self.main.inputOrigin.setEnabled(False)
         self.main.inputType.setEnabled(False)
+        self.main.comboBoxBallSize.setEnabled(False)
 
         self.main.buttonTake.setEnabled(False)
-        self.main.comboBoxBallSize.setEnabled(False)
+        self.main.buttonHold.setEnabled(False)
         self.main.inputDistance.setEnabled(False)
     
     def enablePanel(self):
         self.main.inputOrigin.setEnabled(True)
         self.main.inputType.setEnabled(True)
+        self.main.comboBoxBallSize.setEnabled(True)
         
         self.main.buttonTake.setEnabled(True)
-        self.main.comboBoxBallSize.setEnabled(True)
+        self.main.buttonHold.setEnabled(True)
         self.main.inputDistance.setEnabled(True)
 
     def showMessage(self, title, text):
@@ -213,11 +233,12 @@ class App(QApplication):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
-    def showWarningMessage(self, title, text):
+    def showWarningMessage(self, title, text, details):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Warning)
         msg.setWindowTitle(title)
         msg.setText(text)
+        msg.setDetailedText(details)
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
@@ -230,15 +251,20 @@ class App(QApplication):
         self.reply = msg.exec_()
 
 
-
-
     def checkBallSize(self):
-        if self.main.comboBoxBallSize.currentText() == "":
+        if not self.main.comboBoxBallSize.currentText():
             self.validation = False
             self.main.validationDetails += "Seleccionar tamaño bola \n"
     
-    def checkRockHeight(self):
-        pass
+    def checkSampleOrigin(self):
+        if not self.main.inputOrigin.text():
+            self.validation = False
+            self.main.validationDetails += "no hay origen \n"
+    
+    def checkSampleType(self):
+        if not self.main.inputType.text():
+            self.validation = False
+            self.main.validationDetails += "no hay tipo \n"
     
     def checkInputDistance(self,input):
         if not input:
@@ -250,26 +276,14 @@ class App(QApplication):
         else:
             return True
 
-
     def validate(self):
         self.validation = True
-        self.checkRockHeight()
+        self.checkSampleOrigin()
+        self.checkSampleType()
         self.checkBallSize()
         
-        if self.validation == True:
-            self.main.buttonConfirm.setEnabled(False)
-            self.disablePanel()
-            self.main.buttonLaunch.setEnabled(True)
-        else:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setText("This is a message box")
-            msg.setWindowTitle("MessageBox demo")
-            msg.setDetailedText(self.main.validationDetails)
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.exec_()
+        return self.validation
 
-        self.main.validationDetails = ""
 
     def transformText(self, text):
         text = sub(r"(_|-)+.", " ", text).title().replace(" ", "")

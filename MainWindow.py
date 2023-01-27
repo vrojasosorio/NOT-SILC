@@ -83,22 +83,21 @@ class MainWindow(QWidget):
         self.buttonsLayout.addWidget(self.labelDistance)
         self.inputDistance = QLineEdit("", self)
         self.buttonsLayout.addWidget(self.inputDistance)
-        #self.inputDistance.setEnabled(False)
+        self.inputDistance.setEnabled(False)
 
         # adjust distance
         self.buttonAdjust = QPushButton("Set distance", self)
         self.buttonsLayout.addWidget(self.buttonAdjust)
-        #self.buttonAdjust.setEnabled(False)
+        self.buttonAdjust.setEnabled(False)
 
         # confirm
-        self.buttonConfirm= QPushButton("Confirm", self)
-        self.controlLayout.addWidget(self.buttonConfirm, 0, 0)
-        #self.buttonConfirm.setEnabled(False)
+        self.buttonReset= QPushButton("RESET", self)
+        self.controlLayout.addWidget(self.buttonReset, 0, 0)
 
         # launch
         self.buttonLaunch= QPushButton("LAUNCH", self)
         self.controlLayout.addWidget(self.buttonLaunch, 0, 1)
-        self.buttonLaunch.setEnabled(False)
+        #self.buttonLaunch.setEnabled(False)
 
         # Finish
         self.buttonFinish = QPushButton("Finish", self)
