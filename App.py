@@ -167,32 +167,73 @@ class App(QApplication):
         cmd = response[0]
         val = response[1]
 
-        if cmd == LOAD_BALL:
+        if cmd == HOME_READY:
+            self.showMessage("Action complete","SILC ready")
+            self.main.buttonLoad.setEnabled(True)
+            self.main.descriptionPanel.setEnabled(True)
+            return
+
+        elif cmd == LOADED:
             self.showConfirmMessage(
                 "Confirm action", "The ball is set in place?")
             # esto está peligroso
-            while self.reply == QMessageBox.No:
-                time.sleep(3)
-                self.showConfirmMessage(
-                    "Confirm action", "The ball is set in place?")
-                break
-            self.main.buttonHold.setEnabled(True)
+            if self.reply == QMessageBox.No:
+                self.sendCMD(NOT_HOLD, 0)
+                self.main.buttonLoad.setEnabled(True)
+
+            if self.reply == QMessageBox.Yes:
+                self.serialHandler()
+                self.sendCMD(HOLD_BALL, 0)
+                # self.main.buttonHold.setEnabled(True)
+                # self.main.inputDistance.setEnabled(True)
+                # self.main.buttonAdjustDist.setEnabled(True)
             return
 
         elif cmd == HELD:
-            self.showMessage("Action Complete", "Valve and motor are off")
-            self.main.inputDistance.setEnabled(True)
-            self.main.buttonAdjust.setEnabled(True)
-            return
+            time.sleep(1)
+            self.showMessage(
+                "Action Complete", "Valve and motor are off. Put the sample on the bar.")
+            time.sleep(1)
+            self.showConfirmMessage(
+                "Confirm action", "The sample is on the bar?")
 
-        elif cmd == DROPPED:
-            self.loadData()
-            self.main.buttonLaunch.setEnabled(True)
+            # esto está peligroso
+            while self.reply == QMessageBox.No:
+                self.main.buttonLoad.setEnabled(True)
+                self.showConfirmMessage(
+                    "Confirm action", "The ball is on the bar?")
+            if self.reply == QMessageBox.Yes:
+                self.main.inputDistance.setEnabled(True)
+                self.main.buttonAdjustDist.setEnabled(True)
             return
 
         elif cmd == DISTANCE_SETTED:
+            self.showMessage("Action Complete", "Ready to launch ball")
             self.main.buttonLaunch.setEnabled(True)
+            self.rockSize = val/100
             return
+
+        elif cmd == DROPPED:
+            self.main.buttonLaunch.setEnabled(False)
+            self.main.buttonFinish.setEnabled(False)
+            self.main.buttonReset.setEnabled(True)
+
+            self.loadData()
+
+            # send command for home resetting
+            time.sleep(2)
+            self.serialHandler()
+            self.sendCMD(RESET_HOME, 0)
+
+            return
+
+        elif cmd == HOME_RESETTED:
+            self.main.buttonLaunch.setEnabled(False)
+            self.main.buttonFinish.setEnabled(True)
+            return
+        
+        elif cmd == PRINT:
+            print(val)
 
         else:
             print("NOT_SILC")
@@ -206,7 +247,6 @@ class App(QApplication):
         self.main.comboBoxBallSize.setEnabled(False)
 
         self.main.buttonLoad.setEnabled(False)
-        self.main.buttonHold.setEnabled(False)
         self.main.inputDistance.setEnabled(False)
 
     def enablePanel(self):
@@ -215,7 +255,6 @@ class App(QApplication):
         self.main.comboBoxBallSize.setEnabled(True)
 
         self.main.buttonLoad.setEnabled(True)
-        self.main.buttonHold.setEnabled(True)
         self.main.inputDistance.setEnabled(True)
 
     def showMessage(self, title, text):
