@@ -18,8 +18,11 @@ import datetime
 import serial
 import time
 
-arduino = serial.Serial('/dev/ttyACM0', 115200)
-machine = MotorCommand()
+try:
+    arduino = serial.Serial('COM3', 115200)
+    #arduino = serial.Serial('/dev/ttyACM0', 115200)
+except Exception as e:
+    raise e
 
 class Worker(QObject):
     finished = pyqtSignal()
@@ -32,12 +35,19 @@ class Worker(QObject):
         self.struct_fmt = '<BH'
         self.struct_len = calcsize(self.struct_fmt)
     
+    def read_cmd(self,f):
+        """
+        :param f: file handler or serial file
+        :return: (3 bytes)
+        """
+        return unpack(self.struct_fmt, bytearray(f.read(self.struct_len)))
+    
     def work(self):
         try:
             while True:
                 if arduino.in_waiting > 0:
-                    msg = arduino.read(self.struct_len)
-                    rxCom = unpack(self.struct_fmt, msg)
+                    rxCom = arduino.read_cmd(self.struct_len)
+                    
                     self.response.emit(rxCom)
 
         except Exception as e:
@@ -68,30 +78,7 @@ class App(QApplication):
         self.main.show()
     
     def sendCMD(self, cmd, data):
-        machine.cmd = cmd
-        machine.data = data
-        
-        self.send_command()
-
-    def send_command(self):
-        buff = BytesIO()
-        machine.serialize(buff)
-
-        packet = bytearray(buff.getvalue())
-        packet_str = array('B', packet).tostring()
-   
-        self.write_serial(packet_str)
-
-    def write_serial(self, data):
-        """
-        Write in the serial port.
-        """
-        #print(self.cmd)
-        #print("Hex: {}".format(to_hex(data)))
-        arduino.flushInput()
-        arduino.flushOutput()
-        arduino.write(data)
-        
+        arduino.write(pack('<BH',cmd,data))      
     
     def configureWidgetsActions(self):
         self.main.comboBoxBallSize.currentIndexChanged.connect(self.actionBallSizeBox)
@@ -104,12 +91,6 @@ class App(QApplication):
         self.main.buttonLaunch.clicked.connect(self.actionLaunchButton)
         self.main.buttonReset.clicked.connect(self.actionResetButton)
         self.main.buttonFinish.clicked.connect(self.actionFinishButton)
-
-    def move(self):
-        pass
-    
-    def brake(self):
-        pass
     
     # dato muestra
     def actionBallSizeBox(self):
