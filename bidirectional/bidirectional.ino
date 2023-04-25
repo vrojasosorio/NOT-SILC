@@ -21,18 +21,22 @@ union {
   } unpacked;
 } packet;
 
-#define HOLD_BALL 1
-#define TAKE_BALL 2
-#define DROP_BALL 3
+#define HOLD_BALL  1
+#define LOAD_BALL  2
+#define DROP_BALL  3
+#define SET_DISTANCE 4
+#define MANUAL_HOME 5
+#define RESET_HOME 6
+#define NOT_HOLD 7
 
-#define SET_DISTANCE 9
 
-// responses
-#define TAKEN 10
+#define PRINT 25
+#define LOADED 10
 #define HELD 11
 #define DROPPED 12
-
-#define SETTED 13
+#define DISTANCE_SETTED 13
+#define HOME_READY 23
+#define HOME_RESETTED 14
 
 
 bool readPacket() {
@@ -56,11 +60,11 @@ void loop() {
   if (readPacket() == true) {
     switch (packet.unpacked.cmd) {
         
-      case TAKE_BALL:
+      case LOAD_BALL:
         blinkLed(1000);
         delay(2000);
 
-        packet.bytes[0] = TAKEN;
+        packet.bytes[0] = LOADED;
         packet.bytes[1] = 6;
         
         for (int i = 0; i < numBytes; i++) {
@@ -106,7 +110,7 @@ void loop() {
           blinkLed(500);
         }
 
-        packet.bytes[0] = SETTED;
+        packet.bytes[0] = DISTANCE_SETTED;
         packet.bytes[1] = 6;
         
         for (int i = 0; i < numBytes; i++) {
