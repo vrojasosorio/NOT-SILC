@@ -11,6 +11,7 @@ def main(args):
     global app
 
     app = App(args)
+    app.setStyle('Fusion') #Fusion Windows Oxygen
 
     app.exec_()
 
