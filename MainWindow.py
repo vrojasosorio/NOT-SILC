@@ -8,14 +8,13 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.parent = parent
-        self.iterations = 0
         self.validationDetails = ""
         self.validation = False
  
         self.setupUI()
     
     def setupUI(self):
-        self.setWindowTitle("NOT SILC")
+        self.setWindowTitle("SILC Control Machine Box")
 
         self.layout = QGridLayout()
         self.setLayout(self.layout)
@@ -28,19 +27,23 @@ class MainWindow(QWidget):
         self.descriptionPanel.setLayout(self.descriptionLayout)
 
         # params panel, GB can't add widget
-        self.buttonsPanel = QGroupBox("Initial parameters")
-        self.buttonsPanel.setFixedSize(200,210)
+        self.buttonsPanel = QGroupBox("IMachine Actions")
+        self.buttonsPanel.setFixedSize(200,170)
         self.layout.addWidget(self.buttonsPanel)
         self.buttonsLayout = QGridLayout()
         self.buttonsPanel.setLayout(self.buttonsLayout)
 
 
         # control panel
-        self.controlPanel = QGroupBox("Control of experiments")
+        self.controlPanel = QGroupBox("Experiment control")
         self.controlPanel.setFixedSize(200,100)
         self.layout.addWidget(self.controlPanel)
         self.controlLayout = QGridLayout()
         self.controlPanel.setLayout(self.controlLayout)
+
+        self.descriptionPanel.setEnabled(True)
+        self.buttonsPanel.setEnabled(True)
+        self.controlPanel.setEnabled(True)
 
         # origin
         self.labelOrigin = QLabel("Sample's origin", self)
@@ -69,13 +72,12 @@ class MainWindow(QWidget):
         self.descriptionLayout.addWidget(self.buttonEdit, 6, 1) 
 
         # chupa buttons
-        self.labelHome = QLabel("Chupa ACTIONS XD",self)
-        self.buttonsLayout.addWidget(self.labelHome)
+
         self.buttonLoad = QPushButton("Load ball", self)
         self.buttonsLayout.addWidget(self.buttonLoad)
        
         # set distance 
-        self.labelDistance = QLabel("Release Height", self)
+        self.labelDistance = QLabel("Release Height [mm]", self)
         self.buttonsLayout.addWidget(self.labelDistance)
         self.inputDistance = QLineEdit("", self)
         self.buttonsLayout.addWidget(self.inputDistance)
@@ -83,22 +85,27 @@ class MainWindow(QWidget):
 
         # adjust distance
         self.buttonAdjustDist = QPushButton("Set distance", self)
-        self.buttonsLayout.addWidget(self.buttonAdjust)
+        self.buttonsLayout.addWidget(self.buttonAdjustDist)
         self.buttonAdjustDist.setEnabled(False)
-
-        # confirm
-        self.buttonReset= QPushButton("RESET", self)
-        self.controlLayout.addWidget(self.buttonReset, 0, 0)
 
         # launch
         self.buttonLaunch= QPushButton("LAUNCH", self)
-        self.controlLayout.addWidget(self.buttonLaunch, 0, 1)
+        self.controlLayout.addWidget(self.buttonLaunch, 0, 1, 1, 2)
         #self.buttonLaunch.setEnabled(False)
+
+        # confirm
+        self.buttonReset= QPushButton("RESET", self)
+        self.controlLayout.addWidget(self.buttonReset, 1, 0)
 
         # Finish
         self.buttonFinish = QPushButton("Finish", self)
-        self.controlLayout.addWidget(self.buttonFinish, 1, 0, 1, 2)
+        self.controlLayout.addWidget(self.buttonFinish, 1, 1)
         self.buttonFinish.setEnabled(True)
+
+        # Export
+        self.buttonExport = QPushButton("EXPORT DATA", self)
+        self.controlLayout.addWidget(self.buttonExport, 2, 0, 1, 2)
+        self.buttonExport.setEnabled(True)
 
         # table
         self.table= QTabWidget()
