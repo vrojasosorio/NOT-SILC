@@ -36,7 +36,7 @@ class MainWindow(QWidget):
 
         # control panel
         self.controlPanel = QGroupBox("Experiment control")
-        self.controlPanel.setFixedSize(200,100)
+        self.controlPanel.setFixedSize(200,150)
         self.layout.addWidget(self.controlPanel)
         self.controlLayout = QGridLayout()
         self.controlPanel.setLayout(self.controlLayout)
