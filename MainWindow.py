@@ -71,12 +71,8 @@ class MainWindow(QWidget):
         # chupa buttons
         self.labelHome = QLabel("Chupa ACTIONS XD",self)
         self.buttonsLayout.addWidget(self.labelHome)
-        self.buttonTake = QPushButton("Load ball", self)
-        self.buttonsLayout.addWidget(self.buttonTake)
-
-        self.buttonHold = QPushButton("Hold ball", self)
-        self.buttonsLayout.addWidget(self.buttonHold) 
-        self.buttonHold.setEnabled(False)
+        self.buttonLoad = QPushButton("Load ball", self)
+        self.buttonsLayout.addWidget(self.buttonLoad)
        
         # set distance 
         self.labelDistance = QLabel("Release Height", self)
@@ -86,9 +82,9 @@ class MainWindow(QWidget):
         self.inputDistance.setEnabled(False)
 
         # adjust distance
-        self.buttonAdjust = QPushButton("Set distance", self)
+        self.buttonAdjustDist = QPushButton("Set distance", self)
         self.buttonsLayout.addWidget(self.buttonAdjust)
-        self.buttonAdjust.setEnabled(False)
+        self.buttonAdjustDist.setEnabled(False)
 
         # confirm
         self.buttonReset= QPushButton("RESET", self)
